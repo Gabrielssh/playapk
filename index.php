@@ -63,11 +63,13 @@ a.clean{color:inherit;text-decoration:none;}
   <div class="grid">
     <?php foreach ($appsFiltered as $app): ?>
       <div class="card">
+        <!-- Ícone abre detalhes -->
         <a class="clean" href="app.php?id=<?php echo rawurlencode((string)($app["id"] ?? "")); ?>">
           <img class="icon" src="img/<?php echo rawurlencode((string)($app["img"] ?? "")); ?>" alt="">
         </a>
 
         <div style="flex:1;min-width:0;">
+          <!-- Nome abre detalhes -->
           <a class="clean" href="app.php?id=<?php echo rawurlencode((string)($app["id"] ?? "")); ?>">
             <h3><?php echo h((string)($app["nome"] ?? "")); ?></h3>
           </a>
@@ -75,7 +77,8 @@ a.clean{color:inherit;text-decoration:none;}
           <div class="meta"><?php echo (int)($app["downloads"] ?? 0); ?> downloads</div>
 
           <div style="margin-top:10px;">
-            <a class="clean" href="app.php?id=<?php echo rawurlencode((string)($app["id"] ?? "")); ?>">
+            <!-- Botão baixa direto -->
+            <a class="clean" href="download.php?id=<?php echo rawurlencode((string)($app["id"] ?? "")); ?>">
               <button class="btn btn-install" type="button">Instalar</button>
             </a>
           </div>
