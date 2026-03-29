@@ -28,17 +28,24 @@ fi
 
 echo "==> Clonando/atualizando repositório..."
 mkdir -p "$APP_DIR"
+
 if [ -d "$APP_DIR/.git" ]; then
+  # evita erro: untracked files would be overwritten
+  git -C "$APP_DIR" reset --hard
+  git -C "$APP_DIR" clean -fd
   git -C "$APP_DIR" pull
 else
   rm -rf "$APP_DIR"/*
   git clone "$REPO_URL" "$APP_DIR"
 fi
 
-echo "==> Pastas de dados..."
+echo "==> Criando pastas e apps.json..."
 mkdir -p "$APP_DIR/apks" "$APP_DIR/img"
-touch "$APP_DIR/apps.json"
-[ -s "$APP_DIR/apps.json" ] || echo "[]" > "$APP_DIR/apps.json"
+
+# apps.json precisa ser JSON válido; se estiver vazio, corrige para []
+if [ ! -f "$APP_DIR/apps.json" ] || [ ! -s "$APP_DIR/apps.json" ]; then
+  echo "[]" > "$APP_DIR/apps.json"
+fi
 
 echo "==> Permissões..."
 chown -R root:root "$APP_DIR"
@@ -48,7 +55,7 @@ find "$APP_DIR" -type f -exec chmod 644 {} \;
 chmod 664 "$APP_DIR/apps.json"
 
 echo "==> PHP: upload 1GB (Apache)..."
-PHPV="$(php -r 'echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;')"
+PHPV="$(php -r '\''echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;'\'' )"
 INI="/etc/php/${PHPV}/apache2/php.ini"
 
 set_ini() {
@@ -60,23 +67,25 @@ set_ini() {
   fi
 }
 
-[ -f "$INI" ] && {
+if [ -f "$INI" ]; then
   set_ini upload_max_filesize 1024M
   set_ini post_max_size 1050M
   set_ini max_execution_time 1800
   set_ini max_input_time 1800
   set_ini memory_limit 512M
-}
+else
+  echo "AVISO: php.ini não encontrado em $INI (pulando ajuste de limites)."
+fi
 
 echo "==> Senha admin (hash)..."
 if [ -f "$APP_DIR/admin.php" ]; then
-  HASH="$(php -r 'echo password_hash(getenv("ADMIN_PASS"), PASSWORD_DEFAULT);' ADMIN_PASS="$ADMIN_PASS")"
+  HASH="$(php -r '\''echo password_hash(getenv("ADMIN_PASS"), PASSWORD_DEFAULT);'\'' ADMIN_PASS="$ADMIN_PASS")"
   sed -i "s|__ADMIN_HASH__|${HASH}|g" "$APP_DIR/admin.php" || true
 else
-  echo "AVISO: $APP_DIR/admin.php não existe. Suba os arquivos do site no GitHub."
+  echo "AVISO: $APP_DIR/admin.php não existe. Verifique se o repo tem os arquivos do site."
 fi
 
-echo "==> VirtualHost..."
+echo "==> Criando VirtualHost..."
 cat > /etc/apache2/sites-available/playapk.conf <<EOF
 <VirtualHost *:${PORT}>
   DocumentRoot ${APP_DIR}
@@ -88,6 +97,7 @@ cat > /etc/apache2/sites-available/playapk.conf <<EOF
     Require all granted
   </Directory>
 
+  # Segurança: não executar PHP dentro de apks/img
   <Directory ${APP_DIR}/apks>
     php_admin_flag engine off
     RemoveHandler .php .phtml .php3 .php4 .php5 .php7 .php8
@@ -110,8 +120,11 @@ cat > /etc/apache2/sites-available/playapk.conf <<EOF
 EOF
 
 a2ensite playapk.conf >/dev/null || true
+
+echo "==> Reiniciando Apache..."
 systemctl restart apache2
 
+echo "==> Firewall (opcional)..."
 if [ "$OPEN_UFW" = "1" ]; then
   apt install -y ufw >/dev/null 2>&1 || true
   ufw allow "${PORT}/tcp" >/dev/null 2>&1 || true
