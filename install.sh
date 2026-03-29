@@ -55,7 +55,7 @@ find "$APP_DIR" -type f -exec chmod 644 {} \;
 chmod 664 "$APP_DIR/apps.json"
 
 echo "==> PHP: upload 1GB (Apache)..."
-PHPV="$(php -r '\''echo PHP_MAJOR_VERSION.".".PHP_MINOR_VERSION;'\'' )"
+PHPV="$(php -r "echo PHP_MAJOR_VERSION.'.'.PHP_MINOR_VERSION;")"
 INI="/etc/php/${PHPV}/apache2/php.ini"
 
 set_ini() {
@@ -79,7 +79,7 @@ fi
 
 echo "==> Senha admin (hash)..."
 if [ -f "$APP_DIR/admin.php" ]; then
-  HASH="$(php -r '\''echo password_hash(getenv("ADMIN_PASS"), PASSWORD_DEFAULT);'\'' ADMIN_PASS="$ADMIN_PASS")"
+  HASH="$(php -r "echo password_hash(getenv('ADMIN_PASS'), PASSWORD_DEFAULT);" ADMIN_PASS="$ADMIN_PASS")"
   sed -i "s|__ADMIN_HASH__|${HASH}|g" "$APP_DIR/admin.php" || true
 else
   echo "AVISO: $APP_DIR/admin.php não existe. Verifique se o repo tem os arquivos do site."
