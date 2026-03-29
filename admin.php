@@ -122,13 +122,6 @@ if (isset($_GET["delete"]) && $isAdmin) {
     }
     header("Location: admin.php"); exit;
 }
-
-$limits = [
-  "upload_max_filesize" => ini_get("upload_max_filesize"),
-  "post_max_size"       => ini_get("post_max_size"),
-  "max_execution_time"  => ini_get("max_execution_time"),
-  "max_input_time"      => ini_get("max_input_time"),
-];
 ?>
 <!doctype html>
 <html lang="pt-br">
@@ -164,16 +157,6 @@ button{border:0;cursor:pointer;border-radius:12px;padding:10px 12px;font-weight:
 <?php if ($flash !== ""): ?>
   <div class="flash"><?php echo h($flash); ?></div>
 <?php endif; ?>
-
-<div class="box">
-  <div style="font-weight:900;">Limites atuais do PHP</div>
-  <div class="small">
-    upload_max_filesize: <?php echo h((string)$limits["upload_max_filesize"]); ?> |
-    post_max_size: <?php echo h((string)$limits["post_max_size"]); ?> |
-    max_execution_time: <?php echo h((string)$limits["max_execution_time"]); ?> |
-    max_input_time: <?php echo h((string)$limits["max_input_time"]); ?>
-  </div>
-</div>
 
 <?php if (!$isAdmin): ?>
   <div class="box">
