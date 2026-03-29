@@ -19,6 +19,8 @@ if (!$appFound) { header("Location: index.php"); exit; }
 $appName = (string)($appFound["nome"] ?? "App");
 $appImg  = (string)($appFound["img"] ?? "");
 $downloads = (int)($appFound["downloads"] ?? 0);
+
+$downloadUrl = 'download.php?id=' . rawurlencode((string)($appFound["id"] ?? ""));
 ?>
 <!doctype html>
 <html lang="pt-br">
@@ -38,9 +40,8 @@ body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial;backgrou
 .icon{width:84px;height:84px;border-radius:18px;object-fit:cover;background:#eee;}
 h1{margin:0;font-size:20px;}
 .meta{margin-top:6px;color:var(--muted);font-size:13px}
-.btn{border:0;cursor:pointer;border-radius:14px;padding:12px 14px;font-weight:900;font-size:14px;background:var(--green);color:#fff;width:100%;}
+.btn{display:block;text-align:center;text-decoration:none;border-radius:14px;padding:12px 14px;font-weight:900;font-size:14px;background:var(--green);color:#fff;width:100%;}
 .note{margin-top:10px;color:var(--muted);font-size:12px;line-height:1.35}
-a.clean{text-decoration:none;}
 </style>
 </head>
 <body>
@@ -57,10 +58,8 @@ a.clean{text-decoration:none;}
     </div>
 
     <div style="margin-top:14px;">
-      <a class="clean" href="download.php?id=<?php echo rawurlencode((string)($appFound["id"] ?? "")); ?>">
-        <button class="btn" type="button">Instalar</button>
-      </a>
-      <div class="note">O Android vai pedir confirmação para instalar.</div>
+      <a class="btn" href="<?php echo h($downloadUrl); ?>" download>Instalar</a>
+      <div class="note">Após baixar, toque na notificação do download para abrir o instalador.</div>
     </div>
   </div>
 </div>
