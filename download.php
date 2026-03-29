@@ -20,13 +20,18 @@ foreach ($apps as &$app) {
         $app["downloads"] = (int)($app["downloads"] ?? 0) + 1;
         file_put_contents(APPS_FILE, json_encode($apps, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT), LOCK_EX);
 
-        header("X-Content-Type-Options: nosniff");
-        header("Content-Type: application/vnd.android.package-archive");
-        header("Content-Disposition: attachment; filename=\"" . basename($apk) . "\"");
-        header("Content-Length: " . filesize($file));
+        header('X-Content-Type-Options: nosniff');
+        header('Cache-Control: no-store, no-cache, must-revalidate, max-age=0');
+        header('Pragma: no-cache');
+
+        header('Content-Type: application/vnd.android.package-archive');
+        header('Content-Disposition: attachment; filename="' . basename($apk) . '"');
+        header('Content-Length: ' . filesize($file));
+
         readfile($file);
         exit;
     }
 }
+
 http_response_code(404);
 echo "App não encontrado";
