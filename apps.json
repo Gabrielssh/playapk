@@ -1,4 +1,1 @@
-[ -f /var/www/playapk/apps.json ] || echo "[]" | sudo tee /var/www/playapk/apps.json >/dev/null
-sudo chown www-data:www-data /var/www/playapk/apps.json
-sudo chmod 664 /var/www/playapk/apps.json
-sudo systemctl restart apache2
+
